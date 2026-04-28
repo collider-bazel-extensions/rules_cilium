@@ -15,6 +15,11 @@ diagnostics.
 CILIUM_VERSIONS = {
     "1.16.5": {
         "manifest_sha256": "00ee26478e42b3765d4132d5ed33d0e94ad66659d882bc00c569daa609a4ddf4",
+        # Chart .tgz used by the maintainer-side render flow (see
+        # tools/BUILD.bazel + tools/writeback.sh). Consumers do NOT
+        # download the chart — they consume the pre-rendered manifest.
+        "chart_url":      "https://helm.cilium.io/cilium-1.16.5.tgz",
+        "chart_sha256":   "182035ae7c2cf8d19490ececf618f6a11adc460ed1e7dbd38b23065f02f18b4d",
     },
 }
 

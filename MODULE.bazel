@@ -36,3 +36,32 @@ git_override(
     remote = "https://github.com/collider-bazel-extensions/rules_kind",
     commit = "b9c4670646f8e3772816f56a048e311d5310a763",  # v0.1.2 — adds k8s 1.32 (runc 1.2.5)
 )
+
+# ---- dev-only: rules_helm + chart fetch for the maintainer render flow ------
+# Consumers don't inherit any of this. The chart .tgz is fetched (sha-pinned
+# from CILIUM_VERSIONS) so `bazel run //tools:render_writeback_<ver>` can
+# render the manifest hermetically without host helm.
+bazel_dep(name = "rules_helm", version = "0.2.1", dev_dependency = True)
+git_override(
+    module_name = "rules_helm",
+    remote = "https://github.com/collider-bazel-extensions/rules_helm",
+    commit = "48651387d55f0c50f6d059df246ed73767100afb",  # v0.2.1 — subchart-aware chart-root detection
+)
+
+helm = use_extension("@rules_helm//:extensions.bzl", "helm", dev_dependency = True)
+helm.version(version = "3.20.2")
+use_repo(helm,
+    "helm_linux_amd64",
+    "helm_darwin_amd64",
+    "helm_darwin_arm64",
+)
+register_toolchains(
+    "@helm_linux_amd64//:toolchain",
+    "@helm_darwin_amd64//:toolchain",
+    "@helm_darwin_arm64//:toolchain",
+    dev_dependency = True,
+)
+
+cilium_chart = use_extension("//tools:extensions.bzl", "cilium_chart", dev_dependency = True)
+cilium_chart.version(version = "1.16.5")
+use_repo(cilium_chart, "cilium_chart_1_16_5")

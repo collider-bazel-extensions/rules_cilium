@@ -1,0 +1,56 @@
+"""Maintainer-only render flow.
+
+Pipeline:
+  @cilium_chart_<ver>//:files  →  helm_template  →  bazel-bin/tools/cilium_<ver>.yaml
+                                                    │
+                                                    ▼
+                                        bazel run //tools:render_writeback_<ver>
+                                                    │
+                                                    ▼
+                                  private/manifests/cilium-<ver>.yaml (committed)
+
+Adding a new Cilium version:
+  1. Edit private/versions.bzl::CILIUM_VERSIONS to add chart_url + chart_sha256.
+  2. Add a `helm_template` + `sh_binary` block below.
+  3. `bash tools/render_cilium.sh <version>` (thin shim around `bazel run`).
+
+Render flags (matching DESIGN.md decisions #16 + #17):
+  --kube-version 1.32.0       — match rules_kind v0.1.2's k8s 1.32 image so the
+                                appArmorProfile guard fires correctly.
+  --set hubble.enabled=false  — Hubble's chart self-signs a CA on every
+                                render, breaking determinism. Disabled in v0.1.
+  --include-crds              — Cilium-Operator can register CRDs at runtime,
+                                but applying them up-front avoids a startup
+                                race in the smoke test.
+
+NO host helm needed at any point.
+"""
+
+load("@rules_helm//:defs.bzl", "helm_template")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+
+# ---- 1.16.5 -----------------------------------------------------------------
+
+helm_template(
+    name = "render_cilium_1_16_5",
+    chart = ["@cilium_chart_1_16_5//:files"],
+    namespace = "kube-system",
+    release_name = "cilium",
+    kube_version = "1.32.0",
+    set = {
+        "hubble.enabled": "false",
+    },
+    include_crds = True,
+)
+
+sh_binary(
+    name = "render_writeback_1_16_5",
+    srcs = ["writeback.sh"],
+    data = [":render_cilium_1_16_5"],
+    args = [
+        "$(rootpath :render_cilium_1_16_5)",
+        "private/manifests/cilium-1.16.5.yaml",
+        "1.16.5",
+    ],
+    visibility = ["//visibility:public"],
+)
