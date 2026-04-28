@@ -1,0 +1,11 @@
+# Reference kind cluster config exported for consumers. The Cilium chart
+# requires kindnet to be disabled; this file is the smallest config that
+# does so. See ../DESIGN.md decision #6.
+
+filegroup(
+    name = "kind_cilium_config",
+    srcs = ["kind-cilium.yaml"],
+    visibility = ["//visibility:public"],
+)
+
+exports_files(["kind-cilium.yaml"])

@@ -1,0 +1,17 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+# Reference kind config for use with rules_cilium.
+#
+# `disableDefaultCNI: true` is REQUIRED — kind's default kindnet CNI must
+# not run, otherwise it conflicts with Cilium and routing/NetworkPolicy
+# enforcement is undefined. See DESIGN.md decision #6.
+#
+# Consumers can reference this file directly via:
+#
+#     kind_cluster(
+#         name = "cluster",
+#         k8s_version = "1.32",
+#         config = "@rules_cilium//config:kind_cilium_config",
+#     )
+networking:
+  disableDefaultCNI: true

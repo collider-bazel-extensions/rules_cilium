@@ -31,7 +31,8 @@ kind_cluster(
     # engines + kernel 6.x that breaks Cilium's agent on the older 1.29.2
     # node image (runc 1.1.12). See rules_kind v0.1.2 + DESIGN.md.
     k8s_version = "1.32",
-    config = "kind-config.yaml",
+    # Use the exported reference config — same file consumers reference.
+    config = "//config:kind_cilium_config",
 )
 
 kind_health_check(name = "cluster_health", cluster = ":cluster")
