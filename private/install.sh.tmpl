@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${RUNFILES_DIR:-}" ]]; then
+  if [[ -d "${0}.runfiles" ]]; then RUNFILES_DIR="${0}.runfiles"
+  elif [[ -d "$(dirname "$0").runfiles" ]]; then RUNFILES_DIR="$(dirname "$0").runfiles"
+  fi
+  export RUNFILES_DIR
+fi
+
+exec "${RUNFILES_DIR}/_main/{LAUNCHER}" \
+  --mode install \
+  --manifest "{MANIFEST}" \
+  --namespace "{NAMESPACE}" \
+  --kubeconfig-env "{KUBECONFIG_ENV}"

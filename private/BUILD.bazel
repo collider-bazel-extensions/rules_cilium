@@ -1,0 +1,23 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "launcher.py",
+    "install.sh.tmpl",
+    "health_check.sh.tmpl",
+    "versions.bzl",
+])
+
+py_binary(
+    name = "launcher",
+    srcs = ["launcher.py"],
+    main = "launcher.py",
+)
+
+bzl_library(name = "providers", srcs = ["providers.bzl"])
+bzl_library(name = "versions", srcs = ["versions.bzl"])
+bzl_library(name = "cilium_install", srcs = ["cilium_install.bzl"], deps = [":providers"])
+bzl_library(name = "cilium_health_check", srcs = ["cilium_health_check.bzl"])
+bzl_library(name = "repositories", srcs = ["repositories.bzl"], deps = [":versions"])

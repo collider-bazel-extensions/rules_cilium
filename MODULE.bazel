@@ -1,0 +1,38 @@
+"""rules_cilium — hermetic Cilium CNI install + readiness for Bazel tests."""
+
+module(
+    name = "rules_cilium",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_python", version = "1.7.0")
+
+cilium = use_extension("//:extensions.bzl", "cilium")
+
+# Pinned Cilium release. The chart is pre-rendered by tools/render_cilium.sh
+# into private/manifests/cilium-<ver>.yaml; the extension exposes that
+# committed file via the toolchain. Helm is needed only at maintainer side.
+cilium.version(
+    name = "cilium",
+    version = "1.16.5",
+)
+
+use_repo(cilium, "cilium")
+
+register_toolchains("@cilium//:all")
+
+# ---- dev-only: rules_kind + rules_itest for the smoke test ------------------
+# Consumers do NOT inherit these. The in-tree smoke test composes a kind
+# cluster (with default CNI disabled — see DESIGN.md decision #6 / README's
+# kind config requirement), Cilium via this rule set, and a NetworkPolicy
+# enforcement assertion.
+bazel_dep(name = "rules_itest", version = "0.0.52", dev_dependency = True)
+bazel_dep(name = "rules_shell", version = "0.8.0", dev_dependency = True)
+bazel_dep(name = "rules_kind", version = "0.1.2", dev_dependency = True)
+git_override(
+    module_name = "rules_kind",
+    remote = "https://github.com/collider-bazel-extensions/rules_kind",
+    commit = "b9c4670646f8e3772816f56a048e311d5310a763",  # v0.1.2 — adds k8s 1.32 (runc 1.2.5)
+)

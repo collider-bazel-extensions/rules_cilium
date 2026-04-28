@@ -1,0 +1,85 @@
+"""Tests for rules_cilium.
+
+- Analysis tests verify rules instantiate cleanly without needing a cluster.
+- The smoke test (`:smoke_test`, manual) brings up a kind cluster *with the
+  default CNI disabled*, installs Cilium via the rule, applies two pods +
+  a NetworkPolicy that denies traffic between them, and asserts the deny
+  actually fires.
+"""
+
+load("@rules_cilium//:defs.bzl", "cilium_health_check", "cilium_install")
+load("@rules_itest//:itest.bzl", "itest_service", "service_test")
+load("@rules_kind//:defs.bzl", "kind_cluster", "kind_health_check")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load(":analysis_tests.bzl", "cilium_health_check_test_suite", "cilium_install_test_suite")
+
+# ---- analysis ---------------------------------------------------------------
+
+cilium_install_test_suite(name = "cilium_install_analysis")
+
+cilium_health_check_test_suite(name = "cilium_health_check_analysis")
+
+# ---- smoke composition ------------------------------------------------------
+
+# kind cluster MUST have kindnet disabled — otherwise kindnet runs alongside
+# Cilium and routing/NetworkPolicy is undefined. See DESIGN.md decision #6.
+kind_cluster(
+    name = "cluster",
+    # k8s 1.32 specifically: kindest/node:v1.32.2 ships runc 1.2.5, which
+    # fixes the bind-mount-remount-RO EPERM bug under rootless container
+    # engines + kernel 6.x that breaks Cilium's agent on the older 1.29.2
+    # node image (runc 1.1.12). See rules_kind v0.1.2 + DESIGN.md.
+    k8s_version = "1.32",
+    config = "kind-config.yaml",
+)
+
+kind_health_check(name = "cluster_health", cluster = ":cluster")
+
+itest_service(
+    name = "kind_svc",
+    exe = ":cluster",
+    health_check = ":cluster_health",
+    tags = ["manual"],
+)
+
+cilium_install(name = "cilium_bin", tags = ["manual"])
+
+cilium_health_check(name = "cilium_health_bin", tags = ["manual"])
+
+sh_binary(
+    name = "cilium_install_wrapper",
+    srcs = ["cilium_install_wrapper.sh"],
+    data = [":cilium_bin"],
+)
+
+sh_binary(
+    name = "cilium_health_wrapper",
+    srcs = ["cilium_health_wrapper.sh"],
+    data = [":cilium_health_bin"],
+)
+
+itest_service(
+    name = "cilium_svc",
+    exe = ":cilium_install_wrapper",
+    deps = [":kind_svc"],
+    health_check = ":cilium_health_wrapper",
+    tags = ["manual"],
+)
+
+sh_test(
+    name = "smoke_test_bin",
+    srcs = ["smoke_test.sh"],
+    tags = ["manual"],
+)
+
+service_test(
+    name = "smoke_test",
+    services = [":cilium_svc"],
+    test = ":smoke_test_bin",
+    tags = [
+        "manual",  # needs Docker
+        "no-sandbox",
+        "requires-network",
+    ],
+)
