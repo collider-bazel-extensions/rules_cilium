@@ -1,7 +1,0 @@
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-# Disable kindnet so Cilium can take over as the cluster's CNI. Without
-# this, the kindnet DaemonSet runs alongside Cilium and routing/policy
-# enforcement is undefined. See rules_cilium DESIGN.md decision #6.
-networking:
-  disableDefaultCNI: true

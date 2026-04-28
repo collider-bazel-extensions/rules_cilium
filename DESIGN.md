@@ -23,7 +23,7 @@ family. Cilium-specific divergences are flagged.
 | 3 | Toolchain type | `CILIUM_TOOLCHAIN_TYPE = Label("//toolchain:cilium")`. `ToolchainInfo(cilium = …)` carries the pinned manifest. | All siblings |
 | 4 | Manifest provisioning | Cilium chart **pre-rendered** by `tools/render_cilium.sh` into `private/manifests/cilium-<ver>.yaml`. Sha256-pinned; committed. Helm is **not** required at consumer test time. | rules_capsule pattern (Cilium chart is helm-only — the project's `quick-install.yaml` exists but lags chart releases). |
 | 5 | Public surface | `cilium_install`, `cilium_health_check` + `CiliumInfo` provider. CRs (`CiliumNetworkPolicy`, etc.) are consumer-authored YAML; no rule for them in v0.1. | All siblings |
-| 6 | Cluster prereq | **Consumer must disable kind's default CNI.** The kind config needs `networking.disableDefaultCNI: true` (and optionally `kubeProxyMode: none` for Cilium's kube-proxy replacement). Without this, kindnet runs alongside Cilium and the cluster's behavior is undefined. v0.1 documents this; v0.1.1 ships a reference `config/kind-cilium-config.yaml` as exported file. | Cilium-specific divergence |
+| 6 | Cluster prereq | **Consumer must disable kind's default CNI.** The kind config needs `networking.disableDefaultCNI: true` (and optionally `kubeProxyMode: none` for Cilium's kube-proxy replacement). Without this, kindnet runs alongside Cilium and the cluster's behavior is undefined. v0.1.0 documented this; v0.1.1 ships `config/kind-cilium.yaml` as a public exported `filegroup` (`@rules_cilium//config:kind_cilium_config`) that consumers reference directly. | Cilium-specific divergence |
 | 7 | rules_itest integration | `cilium_install` produces an `itest_service.exe`-shaped target (long-running `kubectl apply` + `kubectl wait` for DaemonSet ready); `cilium_health_check` is the readiness probe. **No pass-through `services=` attr.** | All siblings |
 | 8 | rules_kind dependency | **Examples-only.** The rule itself depends on neither `rules_kind` nor any cluster-provider rule; just needs `KUBECONFIG` (or env-var-named-kubeconfig). | rules_capsule precedent |
 | 9 | Platform matrix v1 | Platform-independent (kubectl + YAML). Validated on Linux x86_64; macOS pending. | rules_capsule |
@@ -64,4 +64,4 @@ family. Cilium-specific divergences are flagged.
 - **CR-shaped rules** (`cilium_network_policy`, etc.). Consumers author YAML.
 - **Hermetic kubectl.**
 - **Hermetic Cilium CLI** (`cilium status`, `cilium connectivity test`). Useful but heavy; not v0.1.
-- **Reference kind config as exported file.** v0.1.1 (decision #6).
+- ~~Reference kind config as exported file.~~ Shipped in v0.1.1 — see decision #6.

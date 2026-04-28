@@ -87,27 +87,30 @@ NetworkPolicy actually enforces, see
 
 Cilium replaces the cluster's CNI. Under `kind`, the default `kindnet`
 DaemonSet must be **disabled** in the kind config — otherwise kindnet
-runs alongside Cilium and routing/policy enforcement is undefined:
+runs alongside Cilium and routing/policy enforcement is undefined.
+
+`rules_cilium` ships a reference kind config you can reference directly:
+
+```python
+kind_cluster(
+    name = "cluster",
+    k8s_version = "1.32",         # see caveat below — 1.29 won't work
+    config = "@rules_cilium//config:kind_cilium_config",
+)
+```
+
+The file (`config/kind-cilium.yaml`) is just:
 
 ```yaml
-# kind-config.yaml
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 networking:
   disableDefaultCNI: true
 ```
 
-Pass it to `kind_cluster` via the `config` attr:
-
-```python
-kind_cluster(
-    name = "cluster",
-    k8s_version = "1.32",         # see caveat below — 1.29 won't work
-    config = "kind-config.yaml",
-)
-```
-
-(See `tests/kind-config.yaml` for the exact reference.)
+If your cluster needs other config (extra nodes, port mappings, feature
+gates, etc.), copy the file into your repo and extend it instead — the
+only `rules_cilium` requirement is `networking.disableDefaultCNI: true`.
 
 ---
 
