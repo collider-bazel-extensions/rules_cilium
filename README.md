@@ -94,7 +94,7 @@ runs alongside Cilium and routing/policy enforcement is undefined.
 ```python
 kind_cluster(
     name = "cluster",
-    k8s_version = "1.32",         # see caveat below — 1.29 won't work
+    k8s_version = "1.35",         # see caveat below — 1.29 won't work
     config = "@rules_cilium//config:kind_cilium_config",
 )
 ```
@@ -181,7 +181,7 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 # 1. The cluster — kindnet disabled (see above).
 kind_cluster(
     name = "cluster",
-    k8s_version = "1.32",
+    k8s_version = "1.35",
     config = "kind-config.yaml",
 )
 kind_health_check(name = "cluster_health", cluster = ":cluster")

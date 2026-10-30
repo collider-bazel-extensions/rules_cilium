@@ -30,7 +30,7 @@ kind_cluster(
     # fixes the bind-mount-remount-RO EPERM bug under rootless container
     # engines + kernel 6.x that breaks Cilium's agent on the older 1.29.2
     # node image (runc 1.1.12). See rules_kind v0.1.2 + DESIGN.md.
-    k8s_version = "1.32",
+    k8s_version = "1.35",
     # Use the exported reference config — same file consumers reference.
     config = "//config:kind_cilium_config",
 )
