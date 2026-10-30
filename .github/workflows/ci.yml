@@ -38,7 +38,7 @@ jobs:
           if-no-files-found: ignore
 
   smoke:
-    # End-to-end: kind cluster (k8s 1.32, kindnet disabled) + Cilium install
+    # End-to-end: kind cluster (k8s 1.35, kindnet disabled) + Cilium install
     # via this rule + NetworkPolicy enforcement assertion. Runs under rootful
     # Docker on ubuntu-latest, which gives the Cilium agent the kernel
     # capabilities it needs to mount /sys/fs/bpf — a step that fails under
