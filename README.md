@@ -40,17 +40,25 @@ rule is platform-independent (just kubectl + a static YAML). See
 ## Installation
 
 ```python
-bazel_dep(name = "rules_cilium", version = "0.1.0")
+bazel_dep(name = "rules_cilium", version = "0.1.2")
+```
 
+That's all: rules_cilium's own `MODULE.bazel` pins Cilium 1.16.5 and registers the toolchain. To pin a version yourself, set it in your root module:
+
+```python
 cilium = use_extension("@rules_cilium//:extensions.bzl", "cilium")
 cilium.version(version = "1.16.5")
 use_repo(cilium, "cilium")
-
-register_toolchains("@cilium//:all")
 ```
 
+The root module's `cilium.version()` tags override rules_cilium's own by `name` (default `"cilium"`); other modules' tags are ignored. Before v0.1.2 the root had to set it, or resolution failed with `does not generate repository "cilium"`. An extra `register_toolchains("@cilium//:all")` in your root is harmless but no longer needed.
+
 `rules_cilium` is **Bzlmod-only** in v0.1. Until it lands in BCR, consume
-via `archive_override` or a git pin pointing at a tag.
+via `archive_override` or a git pin pointing at a tag. The release archive
+(the tag tarball) leaves out `tests/` and `tools/`, whose packages load
+dev-only modules, so `bazel query @rules_cilium//...` works for consumers; a
+`git_override` clone still contains them (name packages instead, e.g.
+`@rules_cilium//:all`).
 
 For the in-tree smoke test composition, you also need
 [`rules_kind`](https://github.com/collider-bazel-extensions/rules_kind)
