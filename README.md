@@ -295,3 +295,11 @@ The rule is platform-independent (kubectl + static YAML), but no one has
 run the smoke test on Darwin. A green smoke run on macOS — even a pasted
 log from `bazel test //tests:smoke_test` — would unblock the macOS
 support claim. Filing an issue with the result is plenty.
+
+---
+
+## Requesting a new rules package
+
+Want Bazel rules for another tool or service?
+[Request a rules package](https://github.com/collider-bazel-extensions/.github/issues/new?template=request-a-rules-package.yml).
+The [organization page](https://github.com/collider-bazel-extensions) lists every package.
