@@ -40,7 +40,7 @@ rule is platform-independent (just kubectl + a static YAML). See
 ## Installation
 
 ```python
-bazel_dep(name = "rules_cilium", version = "0.1.2")
+bazel_dep(name = "rules_cilium", version = "0.1.3")
 ```
 
 That's all: rules_cilium's own `MODULE.bazel` pins Cilium 1.16.5 and registers the toolchain. To pin a version yourself, set it in your root module:
@@ -303,3 +303,9 @@ support claim. Filing an issue with the result is plenty.
 Want Bazel rules for another tool or service?
 [Request a rules package](https://github.com/collider-bazel-extensions/.github/issues/new?template=request-a-rules-package.yml).
 The [organization page](https://github.com/collider-bazel-extensions) lists every package.
+
+## License
+
+[Apache License 2.0](LICENSE) (SPDX: `Apache-2.0`).
+
+Manifests in `private/manifests/` that are rendered from upstream charts or releases remain under their upstream projects' licences.
